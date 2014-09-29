@@ -5,7 +5,14 @@ by Pavel Yakimenko
 
 #include <Stepper.h>
 
-Stepper stepper(64, 8, 10, 9, 11);
+typedef struct StepperData {
+  int stepsPerRotation;
+  int maxSpeed;
+} kStepperData;
+
+kStepperData _28byj = {64, 460};
+
+Stepper stepper(_28byj.stepsPerRotation, 8, 10, 9, 11);
 
 const int thumbX = A0;
 const int thumbY = A1;
@@ -33,8 +40,6 @@ void setup() {
   pinMode(ledX, OUTPUT);
   pinMode(ledY, OUTPUT);
   pinMode(ledSwitch, OUTPUT);
-  
-  stepper.setSpeed(100);
 
   calibrate();
 }
@@ -68,11 +73,28 @@ void displaySwitchState() {
 }
 
 void loop() {
+  // Use OX for Azimuth
   int xValue = axisValue(thumbX, ledX, axisXCenter);
+  Serial.println(xValue);
+  if(xValue != 0) {
+    int stepperSpeed = pow(2, xValue / 10);
+    if(stepperSpeed > _28byj.maxSpeed) {
+      stepperSpeed = _28byj.maxSpeed;
+    }
+    stepper.setSpeed(stepperSpeed > 0 ? stepperSpeed : - stepperSpeed);
+    stepper.step(stepperSpeed);
+  }
+
   int yValue = axisValue(thumbY, ledY, axisYCenter);
 
   displaySwitchState();
 
-  Serial.println(xValue);
-  stepper.step(xValue/100);
+//  for(int i = 440; i<=470; i+=10) {
+//    Serial.println(i);
+//    for(int j=0; j<10; j++) {
+//      stepper.setSpeed(i);
+//      stepper.step(i);
+//    }
+//    delay(500);
+//  }
 }
