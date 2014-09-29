@@ -4,10 +4,8 @@ by Pavel Yakimenko
 */
 
 #include <Stepper.h>
-#include <Servo.h>
 
 Stepper stepper(64, 8, 10, 9, 11);
-Servo servo;
 
 const int thumbX = A0;
 const int thumbY = A1;
@@ -37,7 +35,7 @@ void setup() {
   pinMode(ledSwitch, OUTPUT);
   
   stepper.setSpeed(100);
-  servo.attach(A2);
+
   calibrate();
 }
 
@@ -57,7 +55,7 @@ int axisValue(const int axisPin, const int ledPin, const int neutral) {
   if(ledBrightness < 0) {
     ledBrightness *= -1;
   }
-  ledBrightness = map(ledBrightness, axisMin, axisMax, 0, 255);
+  ledBrightness = map(ledBrightness, axisMin, axisMax, 0x0, 0xFF);
   ledBrightness = constrain(ledBrightness, 0x0, 0xFF);
   Serial.println(ledBrightness);
   analogWrite(ledPin, ledBrightness);
@@ -77,13 +75,4 @@ void loop() {
 
   Serial.println(xValue);
   stepper.step(xValue/100);
-
-  for(int i=0; i<180; i+=10) {
-    servo.write(i);
-    delay(15);
-  }
-//  for(int i=180; i<0; i--) {
-//    servo.write(i);
-//    delay(15);
-//  }
 }
